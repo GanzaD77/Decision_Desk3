@@ -13,6 +13,7 @@ const App: React.FC = () => {
   const [briefing, setBriefing] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [tone, setTone] = useState<string>('Balanced');
 
   const handleGenerateBriefing = useCallback(async () => {
     if (!userInput.trim() && briefing) { // Allow empty input to get default tip if no briefing yet
@@ -25,7 +26,7 @@ const App: React.FC = () => {
     setBriefing('');
 
     try {
-      const result = await generateBriefing(userInput);
+      const result = await generateBriefing(userInput, tone);
       setBriefing(result);
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
@@ -34,7 +35,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [userInput, briefing]);
+  }, [userInput, briefing, tone]);
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-200 font-sans flex flex-col items-center p-4 sm:p-6 lg:p-8">
@@ -46,6 +47,8 @@ const App: React.FC = () => {
             setUserInput={setUserInput}
             onSubmit={handleGenerateBriefing}
             isLoading={isLoading}
+            tone={tone}
+            setTone={setTone}
           />
           <div className="mt-8 min-h-[300px]">
             {isLoading && <Loader />}

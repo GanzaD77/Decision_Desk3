@@ -1,7 +1,19 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const createPrompt = (userData: string): string => {
+const getToneInstruction = (tone: string): string => {
+  switch (tone) {
+    case 'Formal & Direct':
+      return 'Write like a concise executive advisor. Use professional, direct language. Focus purely on data-driven insights and strategic imperatives. Avoid motivational language and stick to business objectives.';
+    case 'Casual & Encouraging':
+      return 'Write like a friendly mentor or a supportive teammate. Use a conversational, positive, and encouraging tone. Feel free to use more optimistic phrasing and focus on celebrating small wins and building momentum.';
+    case 'Balanced':
+    default:
+      return 'Write like a smart, upbeat business coach — human, warm, confident.';
+  }
+};
+
+const createPrompt = (userData: string, tone: string): string => {
   const finalUserData = userData.trim() === '' ? 'No data provided today.' : userData;
   return `
     You are DecisionDesk, an AI business strategist and daily advisor for busy entrepreneurs.
@@ -21,10 +33,10 @@ const createPrompt = (userData: string): string => {
 
     Writing Style Guidelines:
     - Max 300 words total.
-    - Write like a smart, upbeat business coach — human, warm, confident.
+    - Tone: ${getToneInstruction(tone)}
     - Avoid generic business jargon; use natural language and fresh phrasing.
     - Always interpret what the data means, not just what it says.
-    - Keep tone consistent: "helpful strategist + morning pep talk".
+    - Keep tone consistent.
     - DO NOT output explanations of your reasoning — just give the formatted briefing.
 
     If the user provides "No data provided today.", give a short default productivity tip and encouragement in the same format. For "Smart Moves", suggest a generic productivity tip. For "Decision of the Day", suggest a small, manageable task.
@@ -34,14 +46,14 @@ const createPrompt = (userData: string): string => {
   `;
 };
 
-export const generateBriefing = async (userData: string): Promise<string> => {
+export const generateBriefing = async (userData: string, tone: string): Promise<string> => {
   if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable not set.");
   }
   
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-  const prompt = createPrompt(userData);
+  const prompt = createPrompt(userData, tone);
 
   try {
     const response = await ai.models.generateContent({
